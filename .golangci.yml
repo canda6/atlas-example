@@ -1,0 +1,62 @@
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  # standard 集合提供 errcheck/govet/ineffassign/staticcheck/unused 等基础检查。
+  default: standard
+  enable:
+    - errorlint
+    - misspell
+    - nilerr
+    - nolintlint
+    - revive
+    - unconvert
+    - unparam
+    - whitespace
+  settings:
+    govet:
+      enable:
+        - nilness
+        - unusedwrite
+        - shadow
+    misspell:
+      locale: US
+    # 只启用精选命名规则与可量化的可维护性规则；不继承 revive 的默认风格规则。
+    revive:
+      enable-default-rules: false
+      rules:
+        - name: receiver-naming
+        - name: error-naming
+        - name: confusing-naming
+        - name: cyclomatic
+          arguments: [20]
+        - name: cognitive-complexity
+          arguments: [25]
+        - name: function-length
+          # 最大语句数、最大行数。
+          arguments: [80, 120]
+  # v2 用 linters.exclusions 取代 v1 的 run.skip-dirs / issues.exclude-rules
+  exclusions:
+    rules:
+      # 排除 codegen 产物（path 为正则，相对 module 根匹配）
+      - path: gen/
+        linters:
+          - ALL
+      # 测试代码中常有意忽略 error，放宽 errcheck
+      - path: _test\.go
+        linters:
+          - errcheck
+
+formatters:
+  enable:
+    - goimports
+  exclusions:
+    # --fix 不应改写生成产物。
+    paths:
+      - gen/
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

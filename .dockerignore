@@ -1,0 +1,4 @@
+**
+!deploy/docker/Dockerfile
+!.build/docker/bin/**
+!web/dist/**

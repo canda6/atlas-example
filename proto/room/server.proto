@@ -1,0 +1,12 @@
+syntax = "proto3";
+package room.server.v1;
+option go_package = "github.com/canda6/atlas-example/gen/proto/go/room";
+import "room/messages.proto";
+import "options/annotations.proto";
+import "google/protobuf/empty.proto";
+service RoomServerService {
+  option (atlas.options.shard) = { message_field: "room_id" };
+  rpc CreateRoom(room.v1.MembershipRequest) returns (room.v1.RoomSnapshot);
+  rpc JoinRoom(room.v1.MembershipRequest) returns (room.v1.RoomSnapshot);
+  rpc LeaveRoom(room.v1.MembershipRequest) returns (google.protobuf.Empty);
+}

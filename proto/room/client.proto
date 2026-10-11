@@ -1,0 +1,9 @@
+syntax = "proto3";
+package room.client.v1;
+option go_package = "github.com/canda6/atlas-example/gen/proto/go/room";
+import "room/messages.proto";
+service RoomClientService {
+  rpc GetRoom(room.v1.RoomRequest) returns (room.v1.RoomSnapshot);
+  rpc Ready(room.v1.RoomRequest) returns (room.v1.RoomSnapshot);
+  rpc PlaceStone(room.v1.PlaceStoneRequest) returns (room.v1.RoomSnapshot);
+}

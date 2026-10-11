@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package auth.client.v1;
+
+option go_package = "github.com/canda6/atlas-example/gen/proto/go/auth";
+
+import "auth/messages.proto";
+
+service AuthClientService {
+  rpc Authenticate(auth.v1.AuthenticateRequest) returns (auth.v1.AuthenticateResponse);
+}

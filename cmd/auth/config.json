@@ -1,0 +1,46 @@
+{
+  "Log": {
+    "Provider": "zap",
+    "Config": {
+      "level": "info",
+      "encoding": "json",
+      "outputPaths": [
+        "stdout",
+        "logs/auth.log"
+      ],
+      "errorOutputPaths": [
+        "stderr"
+      ]
+    }
+  },
+  "Discovery": {
+    "Provider": "consul",
+    "Config": {
+      "address": "127.0.0.1:18500",
+      "check_interval": "2s",
+      "check_timeout": "1s",
+      "query_wait": "2s",
+      "request_timeout": "3s"
+    }
+  },
+  "GrpcClientDefaults": {
+    "insecure": true
+  },
+  "Redis": {
+    "Provider": "redis",
+    "Config": {
+      "addr": "127.0.0.1:16379",
+      "password": "",
+      "db": 2
+    }
+  },
+  "GRPC": {
+    "Provider": "grpcserver",
+    "Config": {
+      "listen": ":9002",
+      "advertise": "localhost:9002",
+      "node_id": "auth-local-1",
+      "graceful_timeout": "10s"
+    }
+  }
+}

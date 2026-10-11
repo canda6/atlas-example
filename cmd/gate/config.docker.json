@@ -1,0 +1,53 @@
+{
+  "Log": {
+    "Provider": "zap",
+    "Config": {
+      "level": "info",
+      "encoding": "json",
+      "outputPaths": [
+        "stdout",
+        "logs/gate.log"
+      ],
+      "errorOutputPaths": [
+        "stderr"
+      ]
+    }
+  },
+  "Discovery": {
+    "Provider": "consul",
+    "Config": {
+      "address": "consul:8500",
+      "check_interval": "2s",
+      "check_timeout": "1s",
+      "query_wait": "2s",
+      "request_timeout": "3s"
+    }
+  },
+  "GrpcClientDefaults": {
+    "insecure": true
+  },
+  "GRPC": {
+    "Provider": "grpcserver",
+    "Config": {
+      "listen": ":9001",
+      "advertise": "gate:9001",
+      "node_id": "gate-docker-1",
+      "graceful_timeout": "30s"
+    }
+  },
+  "Gate": {
+    "timeouts": {
+      "request": "15s",
+      "idle": "2m",
+      "disconnect_call": "3s"
+    },
+    "capacity": {
+      "max_in_flight_per_connection": 64,
+      "max_connections": 100000
+    },
+    "websocket": {
+      "path": "/ws",
+      "listen": ":8081"
+    }
+  }
+}

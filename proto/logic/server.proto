@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package logic.server.v1;
+
+option go_package = "github.com/canda6/atlas-example/gen/proto/go/logic";
+
+import "options/annotations.proto";
+import "gate/gate.proto";
+import "google/protobuf/empty.proto";
+
+service LogicServerService {
+  option (atlas.options.shard) = {
+    message_field: "user_id"
+  };
+
+  rpc OnDisconnect(atlas.gate.v1.OnDisconnectRequest) returns (google.protobuf.Empty);
+}

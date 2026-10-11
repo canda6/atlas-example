@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package logic.v1;
+
+option go_package = "github.com/canda6/atlas-example/gen/proto/go/logic";
+
+message PlayerInfo {
+  string id = 1;
+  string name = 2;
+  reserved 3, 4, 5;
+  reserved "level", "exp", "gold";
+}
+
+message LoginRequest {
+  string user_id = 1;
+}
+
+message LoginResponse {
+  bool success = 1;
+  PlayerInfo player = 2;
+  string message = 3;
+}
+
+message GetBagsRequest {
+  string user_id = 1;
+}
+
+message BagItem {
+  int64 item_id = 1;
+  int64 count = 2;
+}
+
+message GetBagsResponse {
+  repeated BagItem items = 1;
+}

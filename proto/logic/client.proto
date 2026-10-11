@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package logic.client.v1;
+
+option go_package = "github.com/canda6/atlas-example/gen/proto/go/logic";
+
+import "logic/player.proto";
+import "room/messages.proto";
+import "google/protobuf/empty.proto";
+
+service LogicClientService {
+  rpc Login(logic.v1.LoginRequest) returns (logic.v1.LoginResponse);
+  rpc GetBags(logic.v1.GetBagsRequest) returns (logic.v1.GetBagsResponse);
+  rpc CreateRoom(google.protobuf.Empty) returns (room.v1.RoomSnapshot);
+  rpc JoinRoom(room.v1.RoomRequest) returns (room.v1.RoomSnapshot);
+  rpc LeaveRoom(google.protobuf.Empty) returns (google.protobuf.Empty);
+}

@@ -1,0 +1,5 @@
+syntax = "proto3";
+package room.push.v1;
+option go_package = "github.com/canda6/atlas-example/gen/proto/go/roompush";
+import "room/messages.proto";
+message Push { oneof payload { room.v1.RoomSnapshot room_updated = 1; } }

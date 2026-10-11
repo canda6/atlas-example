@@ -1,0 +1,29 @@
+syntax = "proto3";
+package room.v1;
+option go_package = "github.com/canda6/atlas-example/gen/proto/go/room";
+import "gate/gate.proto";
+
+message Member {
+  string user_id = 1;
+  string name = 2;
+  uint32 stone = 3;
+  bool ready = 4;
+}
+message RoomSnapshot {
+  string room_id = 1;
+  repeated Member members = 2;
+  repeated uint32 board = 3;
+  string phase = 4;
+  uint32 turn = 5;
+  string winner_id = 6;
+  string result = 7;
+  uint64 version = 8;
+}
+message RoomRequest { string room_id = 1; }
+message PlaceStoneRequest { string room_id = 1; uint32 x = 2; uint32 y = 3; }
+message MembershipRequest {
+  string room_id = 1;
+  string user_id = 2;
+  string name = 3;
+  atlas.gate.v1.SessionRef session = 4;
+}

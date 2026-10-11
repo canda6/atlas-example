@@ -1,0 +1,38 @@
+{
+  "Log": {
+    "Provider": "zap",
+    "Config": {
+      "level": "info",
+      "encoding": "json",
+      "outputPaths": [
+        "stdout",
+        "logs/room.log"
+      ],
+      "errorOutputPaths": [
+        "stderr"
+      ]
+    }
+  },
+  "Discovery": {
+    "Provider": "consul",
+    "Config": {
+      "address": "consul:8500",
+      "check_interval": "2s",
+      "check_timeout": "1s",
+      "query_wait": "2s",
+      "request_timeout": "3s"
+    }
+  },
+  "GrpcClientDefaults": {
+    "insecure": true
+  },
+  "GRPC": {
+    "Provider": "grpcserver",
+    "Config": {
+      "listen": ":9003",
+      "advertise": "room:9003",
+      "node_id": "room-docker-1",
+      "graceful_timeout": "10s"
+    }
+  }
+}

@@ -1,0 +1,146 @@
+name: atlas-example
+
+x-app: &app
+  image: atlas-example:local
+  build:
+    context: .
+    dockerfile: deploy/docker/Dockerfile
+  user: "${ATLAS_UID:-1000}:${ATLAS_GID:-1000}"
+  restart: unless-stopped
+  stop_grace_period: 45s
+  volumes:
+    - &app-logs
+      type: bind
+      source: ${ATLAS_LOG_DIR:-./logs}
+      target: /app/logs
+  logging:
+    driver: local
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+x-health: &health
+  interval: 2s
+  timeout: 2s
+  retries: 30
+  start_period: 5s
+
+services:
+  redis:
+    image: redis:7.4.2-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    ports:
+      - "127.0.0.1:16379:6379"
+    healthcheck:
+      <<: *health
+      test: ["CMD", "redis-cli", "ping"]
+
+  consul:
+    image: hashicorp/consul:1.22.5@sha256:4e75df3d9d5f8f4d3222322907c9a8e323bc313fc7b248943f93b8f9c64565a7
+    command: ["agent", "-server", "-bootstrap-expect=1", "-node=atlas-consul", "-client=0.0.0.0", "-data-dir=/consul/data", "-ui"]
+    restart: unless-stopped
+    volumes:
+      - consul-data:/consul/data
+    ports:
+      - "127.0.0.1:18500:8500"
+    healthcheck:
+      <<: *health
+      test: ["CMD-SHELL", "consul info | grep -q 'leader = true'"]
+
+  auth:
+    <<: *app
+    volumes:
+      - *app-logs
+      - type: bind
+        source: ${ATLAS_CONFIG_DIR:-./cmd}/auth/config.docker.json
+        target: /app/config/auth.json
+        read_only: true
+        bind:
+          create_host_path: false
+    command: ["/app/auth", "-config", "/app/config/auth.json", "-name", "auth", "-version", "local", "-instance", "auth-docker-1"]
+    depends_on:
+      redis:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+    healthcheck:
+      <<: *health
+      test: ["CMD", "/app/grpc-health-probe", "-addr", "127.0.0.1:9002"]
+
+  logic:
+    <<: *app
+    volumes:
+      - *app-logs
+      - type: bind
+        source: ${ATLAS_CONFIG_DIR:-./cmd}/logic/config.docker.json
+        target: /app/config/logic.json
+        read_only: true
+        bind:
+          create_host_path: false
+    command: ["/app/logic", "-config", "/app/config/logic.json", "-name", "logic", "-version", "local", "-instance", "logic-docker-1"]
+    depends_on:
+      consul:
+        condition: service_healthy
+    healthcheck:
+      <<: *health
+      test: ["CMD", "/app/grpc-health-probe", "-addr", "127.0.0.1:9000"]
+
+  room:
+    <<: *app
+    volumes:
+      - *app-logs
+      - type: bind
+        source: ${ATLAS_CONFIG_DIR:-./cmd}/room/config.docker.json
+        target: /app/config/room.json
+        read_only: true
+        bind:
+          create_host_path: false
+    command: ["/app/room", "-config", "/app/config/room.json", "-name", "room", "-version", "local", "-instance", "room-docker-1"]
+    depends_on:
+      consul:
+        condition: service_healthy
+    healthcheck:
+      <<: *health
+      test: ["CMD", "/app/grpc-health-probe", "-addr", "127.0.0.1:9003"]
+
+  gate:
+    <<: *app
+    volumes:
+      - *app-logs
+      - type: bind
+        source: ${ATLAS_CONFIG_DIR:-./cmd}/gate/config.docker.json
+        target: /app/config/gate.json
+        read_only: true
+        bind:
+          create_host_path: false
+    command: ["/app/gate", "-config", "/app/config/gate.json", "-name", "gate", "-version", "local", "-instance", "gate-docker-1"]
+    depends_on:
+      consul:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+      logic:
+        condition: service_healthy
+      room:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8081:8081"
+    healthcheck:
+      <<: *health
+      test: ["CMD", "/app/grpc-health-probe", "-addr", "127.0.0.1:9001"]
+
+  testclient:
+    image: atlas-example:local
+    profiles: ["tools"]
+    entrypoint: ["/app/testclient"]
+    command: ["-addr", "ws://gate:8081/ws", "-mode", "basic", "-account-id", "docker-demo-001"]
+    depends_on:
+      gate:
+        condition: service_healthy
+
+volumes:
+  redis-data:
+  consul-data:
